@@ -54,6 +54,7 @@ const App = () => {
   const [good, setGood] = useState(0)
   const [neutral, setNeutral] = useState(0)
   const [bad, setBad] = useState(0)
+
   const [selected, setSelected] = useState(0)
   const [votes, setVotes] = useState(Array(anecdotes.length).fill(0))
 
@@ -67,6 +68,10 @@ const App = () => {
     copy[selected] += 1          // sumamos un voto
     setVotes(copy)               // actualizamos el estado
   }
+
+  // Encontrar la anécdota con más votos
+  const maxVotes = Math.max(...votes)
+  const topAnecdoteIndex = votes.indexOf(maxVotes)
     
   return (
     <div>
@@ -83,7 +88,16 @@ const App = () => {
         <p>{anecdotes[selected]}</p>
         <p>has {votes[selected]} votes</p>
         <button onClick={handleVote}>vote</button>
-        <button onClick={handleNextAnecdote}>next anecdote</button>  
+        <button onClick={handleNextAnecdote}>next anecdote</button> 
+         <h1>Anecdote with most votes</h1>
+        {maxVotes === 0 ? (
+          <p>No votes yet</p>
+        ) : (
+          <>
+            <p>{anecdotes[topAnecdoteIndex]}</p>
+            <p>has {maxVotes} votes</p>
+          </>
+        )} 
       </div>
 
     </div>
