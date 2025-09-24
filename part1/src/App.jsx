@@ -55,23 +55,35 @@ const App = () => {
   const [neutral, setNeutral] = useState(0)
   const [bad, setBad] = useState(0)
   const [selected, setSelected] = useState(0)
+  const [votes, setVotes] = useState(Array(anecdotes.length).fill(0))
 
   const handleNextAnecdote = () => {
     const randomIndex = Math.floor(Math.random() * anecdotes.length)
     setSelected(randomIndex)
   }
+
+  const handleVote = () => {
+    const copy = [...votes]      // hacemos una copia
+    copy[selected] += 1          // sumamos un voto
+    setVotes(copy)               // actualizamos el estado
+  }
     
   return (
     <div>
-      <h1>give feedback</h1>
-      <Button handleClick={ () => setGood(good + 1)} text="good" />
-      <Button handleClick={ () => setNeutral(neutral + 1)} text="neutral" />
-      <Button handleClick={ () => setBad(bad + 1)} text="bad" />
-      <h1>statistics</h1>
-      <Statistics good={good} neutral={neutral} bad={bad} /> 
       <div>
+        <h1>give feedback</h1>
+        <Button handleClick={ () => setGood(good + 1)} text="good" />
+        <Button handleClick={ () => setNeutral(neutral + 1)} text="neutral" />
+        <Button handleClick={ () => setBad(bad + 1)} text="bad" />
+        <h1>statistics</h1>
+        <Statistics good={good} neutral={neutral} bad={bad} /> 
+      </div>
+      <div>
+        <h1>Anecdote</h1>
         <p>{anecdotes[selected]}</p>
-        <button onClick={handleNextAnecdote}>next anecdote</button>
+        <p>has {votes[selected]} votes</p>
+        <button onClick={handleVote}>vote</button>
+        <button onClick={handleNextAnecdote}>next anecdote</button>  
       </div>
 
     </div>
