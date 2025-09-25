@@ -1,3 +1,4 @@
+//Componente Course
 const Header = ({ name }) => <h2>{name}</h2>
 
 const Part = ({ part }) => (
