@@ -14,11 +14,20 @@ const Content = ({ parts }) => (
   </div>
 )
 
+const Total = ({ parts }) => {
+  let total = 0
+  for (const part of parts) {
+    total += part.exercises
+  }
+  return <p>Total de ejercicios {total}</p>
+}
+
 const Course = ({ course }) => {
   return (
     <div>
       <Header name={course.name} />
       <Content parts={course.parts} />
+      <Total parts={course.parts} />
     </div>
   )
 }
