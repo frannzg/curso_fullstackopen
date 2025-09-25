@@ -1,39 +1,19 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
+import PersonForm from './components/PersonForm'
 
-// Componente para el filtro de búsqueda
-const Filter = ({ filter, onFilterChange }) => {
-  return (
-    <div>
-      filter shown with: <input value={filter} onChange={onFilterChange} />
-    </div>
-  )
-}
+const Filter = ({ filter, onFilterChange }) => (
+  <div>
+    Filtro enseña con: <input value={filter} onChange={onFilterChange} />
+  </div>
+)
 
-// Formulario para añadir una nueva persona
-const PersonForm = ({ onSubmit, nameValue, onNameChange, numberValue, onNumberChange }) => {
-  return (
-    <form onSubmit={onSubmit}>
-      <div>
-        name: <input value={nameValue} onChange={onNameChange} />
-      </div>
-      <div>
-        number: <input value={numberValue} onChange={onNumberChange} />
-      </div>
-      <div>
-        <button type="submit">add</button>
-      </div>
-    </form>
-  )
-}
-
-// Componente para mostrar una única persona
 const Person = ({ person }) => (
   <li>
-    {person.name} — {person.number}
+    {person.name} - {person.number}
   </li>
 )
 
-// Componente que renderiza la lista de personas visibles
 const Persons = ({ personsToShow }) => (
   <ul>
     {personsToShow.map(person => (
@@ -42,18 +22,19 @@ const Persons = ({ personsToShow }) => (
   </ul>
 )
 
-// Componente raíz de la aplicación (estado y handlers aquí)
 export default function App() {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-123456', id: 1 },
-    { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-    { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-    { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
-  ])
-
+  const [persons,setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+
+  useEffect(() => {
+    axios
+      .get('http://localhost:3001/persons')
+      .then(response => {
+        setPersons(response.data)
+      })
+  }, [])
 
   const handleNameChange = (e) => setNewName(e.target.value)
   const handleNumberChange = (e) => setNewNumber(e.target.value)
@@ -62,7 +43,6 @@ export default function App() {
   const addPerson = (event) => {
     event.preventDefault()
 
-    // Evitar duplicados por nombre
     if (persons.some(p => p.name === newName)) {
       alert(`${newName} is already added to phonebook`)
       return
@@ -71,7 +51,7 @@ export default function App() {
     const personObject = {
       name: newName,
       number: newNumber,
-      id: Date.now()
+      id: persons.length > 0 ? Math.max(...persons.map(p => p.id)) + 1 : 1
     }
 
     setPersons(persons.concat(personObject))
@@ -79,18 +59,16 @@ export default function App() {
     setNewNumber('')
   }
 
-  // Filtrado case-insensitive
   const personsToShow = persons.filter(p =>
     p.name.toLowerCase().includes(filter.toLowerCase())
   )
 
   return (
     <div>
-      <h2>Phonebook</h2>
-
+      <h2>Lista de telefonos</h2>
       <Filter filter={filter} onFilterChange={handleFilterChange} />
 
-      <h3>Add a new</h3>
+      <h3>Agregar uno nuevo</h3>
       <PersonForm
         onSubmit={addPerson}
         nameValue={newName}
@@ -99,7 +77,7 @@ export default function App() {
         onNumberChange={handleNumberChange}
       />
 
-      <h3>Numbers</h3>
+      <h3>Números</h3>
       <Persons personsToShow={personsToShow} />
     </div>
   )
