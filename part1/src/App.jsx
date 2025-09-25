@@ -1,77 +1,106 @@
 import { useState } from 'react'
 
-const App = () => {
+// Componente para el filtro de búsqueda
+const Filter = ({ filter, onFilterChange }) => {
+  return (
+    <div>
+      filter shown with: <input value={filter} onChange={onFilterChange} />
+    </div>
+  )
+}
+
+// Formulario para añadir una nueva persona
+const PersonForm = ({ onSubmit, nameValue, onNameChange, numberValue, onNumberChange }) => {
+  return (
+    <form onSubmit={onSubmit}>
+      <div>
+        name: <input value={nameValue} onChange={onNameChange} />
+      </div>
+      <div>
+        number: <input value={numberValue} onChange={onNumberChange} />
+      </div>
+      <div>
+        <button type="submit">add</button>
+      </div>
+    </form>
+  )
+}
+
+// Componente para mostrar una única persona
+const Person = ({ person }) => (
+  <li>
+    {person.name} — {person.number}
+  </li>
+)
+
+// Componente que renderiza la lista de personas visibles
+const Persons = ({ personsToShow }) => (
+  <ul>
+    {personsToShow.map(person => (
+      <Person key={person.id} person={person} />
+    ))}
+  </ul>
+)
+
+// Componente raíz de la aplicación (estado y handlers aquí)
+export default function App() {
   const [persons, setPersons] = useState([
     { name: 'Arto Hellas', number: '040-123456', id: 1 },
     { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
     { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
     { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
-  ]) 
+  ])
 
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
 
-  const handleSubmit = (event) => {
+  const handleNameChange = (e) => setNewName(e.target.value)
+  const handleNumberChange = (e) => setNewNumber(e.target.value)
+  const handleFilterChange = (e) => setFilter(e.target.value)
+
+  const addPerson = (event) => {
     event.preventDefault()
 
-    const nameExists = persons.some(person => person.name === newName)
-
-    if (nameExists) {
+    // Evitar duplicados por nombre
+    if (persons.some(p => p.name === newName)) {
       alert(`${newName} is already added to phonebook`)
-    } else {
-      const personObject = { 
-        name: newName,
-        number: newNumber,
-        id: persons.length + 1
-      }
-      setPersons(persons.concat(personObject))
+      return
     }
 
+    const personObject = {
+      name: newName,
+      number: newNumber,
+      id: Date.now()
+    }
+
+    setPersons(persons.concat(personObject))
     setNewName('')
     setNewNumber('')
   }
 
-  const handleNameChange = (event) => setNewName(event.target.value)
-  const handleNumberChange = (event) => setNewNumber(event.target.value)
-  const handleFilterChange = (event) => setFilter(event.target.value)
-
-  // Filtra según el valor del filtro (ignora mayúsculas/minúsculas)
-  const personsToShow = persons.filter(person =>
-    person.name.toLowerCase().includes(filter.toLowerCase())
+  // Filtrado case-insensitive
+  const personsToShow = persons.filter(p =>
+    p.name.toLowerCase().includes(filter.toLowerCase())
   )
 
   return (
     <div>
       <h2>Phonebook</h2>
 
-      <div>
-        filter shown with: <input value={filter} onChange={handleFilterChange} />
-      </div>
+      <Filter filter={filter} onFilterChange={handleFilterChange} />
 
       <h3>Add a new</h3>
-      <form onSubmit={handleSubmit}>
-        <div>
-          name: <input value={newName} onChange={handleNameChange} />
-        </div>
-        <div>
-          number: <input value={newNumber} onChange={handleNumberChange} />
-        </div>
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
+      <PersonForm
+        onSubmit={addPerson}
+        nameValue={newName}
+        onNameChange={handleNameChange}
+        numberValue={newNumber}
+        onNumberChange={handleNumberChange}
+      />
 
       <h3>Numbers</h3>
-      <ul>
-        {personsToShow.map(person => (
-          <li key={person.id}>
-            {person.name} — {person.number}
-          </li>
-        ))}
-      </ul>
+      <Persons personsToShow={personsToShow} />
     </div>
   )
 }
-
-export default App
