@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react'
+import './index.css'
 //import axios from 'axios'
 import PersonForm from './components/PersonForm'
 import personService from './services/persons.js'
+import Notification from './components/Notification.jsx'
+
 
 const Filter = ({ filter, onFilterChange }) => (
   <div>
@@ -32,6 +35,18 @@ export default function App() {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [notification, setNotification] = useState({ message: null, type: null })
+
+  const handleNameChange = (e) => setNewName(e.target.value)
+  const handleNumberChange = (e) => setNewNumber(e.target.value)
+  const handleFilterChange = (e) => setFilter(e.target.value)
+
+  const showNotification = (message, type) => {
+    setNotification({ message,type })
+    setTimeout(() => {
+        setNotification({ message: null, type: null })
+    }, 5000)
+  }
 
   // Cargar datos iniciales
   useEffect(() => {
@@ -41,14 +56,11 @@ export default function App() {
         setPersons(initialPersons)
       })
       .catch(error => {
-        alert(`Error al cargar los contactos: ${error.message}`)
+        showNotification(`Error al cargar los contactos: ${error.message}`, 'error')
       })
   }, [])
 
-  const handleNameChange = (e) => setNewName(e.target.value)
-  const handleNumberChange = (e) => setNewNumber(e.target.value)
-  const handleFilterChange = (e) => setFilter(e.target.value)
-
+  
   const addPerson = (event) => {
     event.preventDefault()
 
@@ -69,9 +81,10 @@ export default function App() {
           ))
           setNewName('')
           setNewNumber('')
+          showNotification(`Se actualizó el numero de ${newName}`, 'success')
         })
         .catch(error => {
-          alert(`Error al actualizar el contacto: ${error.message}`)
+          showNotification(`Error al actualizar el contacto: ${error.message}`, 'error')
         })
       }
       return
@@ -83,9 +96,10 @@ export default function App() {
         setPersons(persons.concat(returnedPerson))
         setNewName('')
         setNewNumber('')
+        showNotification(`Se añadió ${newName}`, 'success')
       })
       .catch(error => {
-        alert(`Error al crear el contacto: ${error.message}`)
+        showNotification(`Error al crear el contacto: ${error.message}`, 'error')
       })
     }
 
@@ -95,9 +109,10 @@ export default function App() {
           .remove(person.id)
           .then(() => {
             setPersons(persons.filter(p => p.id !== person.id))
+            showNotification(`Se eliminó ${person.name}`, 'success')
           })
           .catch(error => {
-            alert(`Error al eliminar el contacto: ${error.message}`)
+            showNotification(`Error al eliminar el contacto: ${error.message}`, 'error')
           })
       }
     }
@@ -109,7 +124,7 @@ export default function App() {
   return (
     <div>
       <h2>Lista de teléfonos</h2>
-      
+      <Notification message={notification.message} type={notification.type} />
       <Filter 
         filter={filter} 
         onFilterChange={handleFilterChange} 
