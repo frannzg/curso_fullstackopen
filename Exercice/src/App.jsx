@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import './index.css'
-// import axios from 'axios'
+import axios from 'axios'
 // import PersonForm from './components/PersonForm'
 // import personService from './services/persons.js'
 // import Notification from './components/Notification.jsx'
@@ -148,12 +148,13 @@ export default function App() {
 ========================================
 */
 
-import axios from 'axios'
-
-const CountryList = ({ countries }) => (
+const CountryList = ({ countries, onShow }) => (
   <ul>
     {countries.map(c => (
-      <li key={c.cca3}>{c.name.common}</li>
+      <li key={c.cca3}>
+        {c.name.common}{' '}
+        <button onClick={() => onShow(c)}>show</button>
+      </li>
     ))}
   </ul>
 )
@@ -180,10 +181,12 @@ const CountryDetail = ({ country }) => (
 export default function App() {
   const [query, setQuery] = useState('')
   const [countries, setCountries] = useState([])
+  const [selectedCountry, setSelectedCountry] = useState(null) // 👈 nuevo estado
 
   useEffect(() => {
     if (query.trim() === '') {
       setCountries([])
+      setSelectedCountry(null)
       return
     }
 
@@ -194,6 +197,7 @@ export default function App() {
           c.name.common.toLowerCase().includes(query.toLowerCase())
         )
         setCountries(filtered)
+        setSelectedCountry(null) // 👈 resetea detalle cuando cambia búsqueda
       })
   }, [query])
 
@@ -208,13 +212,16 @@ export default function App() {
 
       {countries.length > 10 && <p>Demasiados resultados, especifica mejor</p>}
 
-      {countries.length <= 10 && countries.length > 1 && (
-        <CountryList countries={countries} />
+      {countries.length <= 10 && countries.length > 1 && !selectedCountry && (
+        <CountryList countries={countries} onShow={setSelectedCountry} />
       )}
 
       {countries.length === 1 && (
         <CountryDetail country={countries[0]} />
       )}
+
+      {/* 👇 si seleccionamos un país con el botón "show" */}
+      {selectedCountry && <CountryDetail country={selectedCountry} />}
     </div>
   )
 }
