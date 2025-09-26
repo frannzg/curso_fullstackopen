@@ -5,4 +5,4 @@ Este repositiorio contiene todo los ejercicios y la toerica del curso "**Full St
 **Enlace:** https://fullstackopen.com/es/ 
 
 **Seguimiento:**
-Part 2 E Teorica
+Part 3
