@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react'
 import './index.css'
-//import axios from 'axios'
-import PersonForm from './components/PersonForm'
-import personService from './services/persons.js'
-import Notification from './components/Notification.jsx'
+// import axios from 'axios'
+// import PersonForm from './components/PersonForm'
+// import personService from './services/persons.js'
+// import Notification from './components/Notification.jsx'
 
+/* 
+========================================
+ CÓDIGO ORIGINAL (Agenda Telefónica)
+========================================
 
 const Filter = ({ filter, onFilterChange }) => (
   <div>
@@ -48,7 +52,6 @@ export default function App() {
     }, 5000)
   }
 
-  // Cargar datos iniciales
   useEffect(() => {
     personService
       .getAll()
@@ -60,33 +63,27 @@ export default function App() {
       })
   }, [])
 
-  
   const addPerson = (event) => {
     event.preventDefault()
-
-    const personObject = {
-      name: newName,
-      number: newNumber
-    }
-
+    const personObject = { name: newName, number: newNumber }
     const existing = persons.find(p => p.name === newName)
 
     if (existing) {
       if (window.confirm(`${newName} ya existe. ¿Quieres actualizar el número?`)) {
         personService
-        .updated(existing.id, {...personObject, id: existing.id})
-        .then(returnedPerson => {
-          setPersons(persons.map(p =>
-            p.id !== existing.id ? p : returnedPerson
-          ))
-          setNewName('')
-          setNewNumber('')
-          showNotification(`Se actualizó el numero de ${newName}`, 'success')
-        })
-        .catch(error => {
-          showNotification(`El contacto '${existing.name}' ya fue eliminado del servidor`, 'error')
-          setPersons(persons.filter(p => p.id !== existing.id))
-        })
+          .updated(existing.id, {...personObject, id: existing.id})
+          .then(returnedPerson => {
+            setPersons(persons.map(p =>
+              p.id !== existing.id ? p : returnedPerson
+            ))
+            setNewName('')
+            setNewNumber('')
+            showNotification(`Se actualizó el numero de ${newName}`, 'success')
+          })
+          .catch(error => {
+            showNotification(`El contacto '${existing.name}' ya fue eliminado del servidor`, 'error')
+            setPersons(persons.filter(p => p.id !== existing.id))
+          })
       }
       return
     }
@@ -102,24 +99,22 @@ export default function App() {
       .catch(error => {
         showNotification(`Error al crear el contacto: ${error.message}`, 'error')
       })
-    }
+  }
 
-    const handleDelete = (person) => {
-      if (window.confirm(`¿Eliminar ${person.name}?`)) {
-        personService
-          .remove(person.id)
-          .then(() => {
-            setPersons(persons.filter(p => p.id !== person.id))
-            showNotification(`Se eliminó ${person.name}`, 'success')
-          })
-          .catch(error => {
-            showNotification(
-              `El contacto '${person.name}' ya fue eliminado del servidor`, 'error',
-              'error')
-            setPersons(persons.filter(p => p.id !== person.id))
-          })
-      }
+  const handleDelete = (person) => {
+    if (window.confirm(`¿Eliminar ${person.name}?`)) {
+      personService
+        .remove(person.id)
+        .then(() => {
+          setPersons(persons.filter(p => p.id !== person.id))
+          showNotification(`Se eliminó ${person.name}`, 'success')
+        })
+        .catch(error => {
+          showNotification(`El contacto '${person.name}' ya fue eliminado del servidor`, 'error')
+          setPersons(persons.filter(p => p.id !== person.id))
+        })
     }
+  }
 
   const personsToShow = persons.filter(p =>
     p.name.toLowerCase().includes(filter.toLowerCase())
@@ -129,10 +124,7 @@ export default function App() {
     <div>
       <h2>Lista de teléfonos</h2>
       <Notification message={notification.message} type={notification.type} />
-      <Filter 
-        filter={filter} 
-        onFilterChange={handleFilterChange} 
-      />
+      <Filter filter={filter} onFilterChange={handleFilterChange} />
 
       <h3>Agregar uno nuevo</h3>
       <PersonForm
@@ -145,6 +137,84 @@ export default function App() {
 
       <h3>Números</h3>
       <Persons personsToShow={personsToShow} handleDelete={handleDelete} />
+    </div>
+  )
+}
+*/
+
+/* 
+========================================
+ NUEVO CÓDIGO (Ejercicio 2.18 - Países)
+========================================
+*/
+
+import axios from 'axios'
+
+const CountryList = ({ countries }) => (
+  <ul>
+    {countries.map(c => (
+      <li key={c.cca3}>{c.name.common}</li>
+    ))}
+  </ul>
+)
+
+const CountryDetail = ({ country }) => (
+  <div>
+    <h2>{country.name.common}</h2>
+    <p>Capital: {country.capital?.[0]}</p>
+    <p>Área: {country.area} km²</p>
+    <h3>Idiomas:</h3>
+    <ul>
+      {Object.values(country.languages || {}).map(lang => (
+        <li key={lang}>{lang}</li>
+      ))}
+    </ul>
+    <img
+      src={country.flags.png}
+      alt={`Bandera de ${country.name.common}`}
+      style={{ width: '150px', border: '1px solid #ccc' }}
+    />
+  </div>
+)
+
+export default function App() {
+  const [query, setQuery] = useState('')
+  const [countries, setCountries] = useState([])
+
+  useEffect(() => {
+    if (query.trim() === '') {
+      setCountries([])
+      return
+    }
+
+    axios
+      .get('https://studies.cs.helsinki.fi/restcountries/api/all')
+      .then(response => {
+        const filtered = response.data.filter(c =>
+          c.name.common.toLowerCase().includes(query.toLowerCase())
+        )
+        setCountries(filtered)
+      })
+  }, [query])
+
+  return (
+    <div>
+      <h1>Buscar países</h1>
+      <input
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Introduce el nombre de un país"
+      />
+
+      {countries.length > 10 && <p>Demasiados resultados, especifica mejor</p>}
+
+      {countries.length <= 10 && countries.length > 1 && (
+        <CountryList countries={countries} />
+      )}
+
+      {countries.length === 1 && (
+        <CountryDetail country={countries[0]} />
+      )}
     </div>
   )
 }
