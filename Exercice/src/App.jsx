@@ -159,29 +159,55 @@ const CountryList = ({ countries, onShow }) => (
   </ul>
 )
 
-const CountryDetail = ({ country }) => (
-  <div>
-    <h2>{country.name.common}</h2>
-    <p>Capital: {country.capital?.[0]}</p>
-    <p>Área: {country.area} km²</p>
-    <h3>Idiomas:</h3>
-    <ul>
-      {Object.values(country.languages || {}).map(lang => (
-        <li key={lang}>{lang}</li>
-      ))}
-    </ul>
-    <img
-      src={country.flags.png}
-      alt={`Bandera de ${country.name.common}`}
-      style={{ width: '150px', border: '1px solid #ccc' }}
-    />
-  </div>
-)
+const CountryDetail = ({ country }) => {
+  const [weather, setWeather] = useState(null)
+  const api_key = import.meta.env.VITE_SOME_KEY
+
+  useEffect(() => {
+    if (!country.capital) return
+    const capital = country.capital[0]
+    axios
+      .get(`https://api.openweathermap.org/data/2.5/weather?q=${capital}&units=metric&appid=${api_key}`)
+      .then(res => setWeather(res.data))
+      .catch(err => console.error(err))
+  }, [country, api_key])
+
+  return (
+    <div>
+      <h2>{country.name.common}</h2>
+      <p>Capital: {country.capital?.[0]}</p>
+      <p>Área: {country.area} km²</p>
+      <h3>Idiomas:</h3>
+      <ul>
+        {Object.values(country.languages || {}).map(lang => (
+          <li key={lang}>{lang}</li>
+        ))}
+      </ul>
+      <img
+        src={country.flags.png}
+        alt={`Bandera de ${country.name.common}`}
+        style={{ width: '150px', border: '1px solid #ccc' }}
+      />
+
+      {weather && (
+        <div>
+          <h3>Clima en {country.capital[0]}</h3>
+          <p>Temperatura: {weather.main.temp} °C</p>
+          <p>Viento: {weather.wind.speed} m/s</p>
+          <img
+            src={`https://openweathermap.org/img/wn/${weather.weather[0].icon}@2x.png`}
+            alt={weather.weather[0].description}
+          />
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function App() {
   const [query, setQuery] = useState('')
   const [countries, setCountries] = useState([])
-  const [selectedCountry, setSelectedCountry] = useState(null) // 👈 nuevo estado
+  const [selectedCountry, setSelectedCountry] = useState(null) 
 
   useEffect(() => {
     if (query.trim() === '') {
@@ -197,7 +223,7 @@ export default function App() {
           c.name.common.toLowerCase().includes(query.toLowerCase())
         )
         setCountries(filtered)
-        setSelectedCountry(null) // 👈 resetea detalle cuando cambia búsqueda
+        setSelectedCountry(null)
       })
   }, [query])
 
@@ -220,7 +246,6 @@ export default function App() {
         <CountryDetail country={countries[0]} />
       )}
 
-      {/* 👇 si seleccionamos un país con el botón "show" */}
       {selectedCountry && <CountryDetail country={selectedCountry} />}
     </div>
   )
