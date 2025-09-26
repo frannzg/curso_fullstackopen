@@ -23,16 +23,20 @@ const Persons = ({ personsToShow }) => (
 )
 
 export default function App() {
-  const [persons,setPersons] = useState([])
+  const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
 
+  // Cargar datos iniciales
   useEffect(() => {
     axios
       .get('http://localhost:3001/persons')
       .then(response => {
         setPersons(response.data)
+      })
+      .catch(error => {
+        alert(`Error al cargar los contactos: ${error.message}`)
       })
   }, [])
 
@@ -43,20 +47,41 @@ export default function App() {
   const addPerson = (event) => {
     event.preventDefault()
 
-    if (persons.some(p => p.name === newName)) {
-      alert(`${newName} is already added to phonebook`)
+    const personObject = {
+      name: newName,
+      number: newNumber
+    }
+
+    const existing = persons.find(p => p.name === newName)
+
+    if (existing) {
+      if (window.confirm(`${newName} ya existe. ¿Quieres actualizar el número?`)) {
+        axios
+          .put(`http://localhost:3001/persons/${existing.id}`, personObject)
+          .then(response => {
+            setPersons(persons.map(p => 
+              p.id !== existing.id ? p : response.data
+            ))
+            setNewName('')
+            setNewNumber('')
+          })
+          .catch(error => {
+            alert(`Error al actualizar el contacto: ${error.message}`)
+          })
+      }
       return
     }
 
-    const personObject = {
-      name: newName,
-      number: newNumber,
-      id: persons.length > 0 ? Math.max(...persons.map(p => p.id)) + 1 : 1
-    }
-
-    setPersons(persons.concat(personObject))
-    setNewName('')
-    setNewNumber('')
+    axios
+      .post('http://localhost:3001/persons', personObject)
+      .then(response => {
+        setPersons(persons.concat(response.data))
+        setNewName('')
+        setNewNumber('')
+      })
+      .catch(error => {
+        alert(`Error al crear el contacto: ${error.message}`)
+      })
   }
 
   const personsToShow = persons.filter(p =>
@@ -65,8 +90,12 @@ export default function App() {
 
   return (
     <div>
-      <h2>Lista de telefonos</h2>
-      <Filter filter={filter} onFilterChange={handleFilterChange} />
+      <h2>Lista de teléfonos</h2>
+      
+      <Filter 
+        filter={filter} 
+        onFilterChange={handleFilterChange} 
+      />
 
       <h3>Agregar uno nuevo</h3>
       <PersonForm
