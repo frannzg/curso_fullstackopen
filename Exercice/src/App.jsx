@@ -9,16 +9,20 @@ const Filter = ({ filter, onFilterChange }) => (
   </div>
 )
 
-const Person = ({ person }) => (
+const Person = ({ person , handleDelete}) => (
   <li>
     {person.name} - {person.number}
+    <button onClick={() => handleDelete(person)}>delete</button>
   </li>
 )
 
-const Persons = ({ personsToShow }) => (
+const Persons = ({ personsToShow, handleDelete }) => (
   <ul>
     {personsToShow.map(person => (
-      <Person key={person.id} person={person} />
+      <Person 
+        key={person.id} 
+        person={person}
+        handleDelete ={handleDelete} />
     ))}
   </ul>
 )
@@ -85,6 +89,19 @@ export default function App() {
       })
     }
 
+    const handleDelete = (person) => {
+      if (window.confirm(`¿Eliminar ${person.name}?`)) {
+        personService
+          .remove(person.id)
+          .then(() => {
+            setPersons(persons.filter(p => p.id !== person.id))
+          })
+          .catch(error => {
+            alert(`Error al eliminar el contacto: ${error.message}`)
+          })
+      }
+    }
+
   const personsToShow = persons.filter(p =>
     p.name.toLowerCase().includes(filter.toLowerCase())
   )
@@ -108,7 +125,7 @@ export default function App() {
       />
 
       <h3>Números</h3>
-      <Persons personsToShow={personsToShow} />
+      <Persons personsToShow={personsToShow} handleDelete={handleDelete} />
     </div>
   )
 }
