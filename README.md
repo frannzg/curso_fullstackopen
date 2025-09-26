@@ -5,4 +5,4 @@ Este repositiorio contiene todo los ejercicios y la toerica del curso "**Full St
 **Enlace:** https://fullstackopen.com/es/ 
 
 **Seguimiento:**
-Ejercicios: https://fullstackopen.com/es/part2/alterando_datos_en_el_servidor
+Part 2 D Ejercicios: https://fullstackopen.com/es/part2/alterando_datos_en_el_servidor
