@@ -62,7 +62,7 @@ export default function App() {
     if (existing) {
       if (window.confirm(`${newName} ya existe. ¿Quieres actualizar el número?`)) {
         personService
-        .updated(existing.id, personObject)
+        .updated(existing.id, {...personObject, id: existing.id})
         .then(returnedPerson => {
           setPersons(persons.map(p =>
             p.id !== existing.id ? p : returnedPerson
