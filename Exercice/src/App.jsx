@@ -84,7 +84,8 @@ export default function App() {
           showNotification(`Se actualizó el numero de ${newName}`, 'success')
         })
         .catch(error => {
-          showNotification(`Error al actualizar el contacto: ${error.message}`, 'error')
+          showNotification(`El contacto '${existing.name}' ya fue eliminado del servidor`, 'error')
+          setPersons(persons.filter(p => p.id !== existing.id))
         })
       }
       return
@@ -112,7 +113,10 @@ export default function App() {
             showNotification(`Se eliminó ${person.name}`, 'success')
           })
           .catch(error => {
-            showNotification(`Error al eliminar el contacto: ${error.message}`, 'error')
+            showNotification(
+              `El contacto '${person.name}' ya fue eliminado del servidor`, 'error',
+              'error')
+            setPersons(persons.filter(p => p.id !== person.id))
           })
       }
     }
